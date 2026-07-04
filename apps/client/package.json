@@ -1,0 +1,11 @@
+{
+  "name": "client",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "echo \"client dev script not yet configured\"",
+    "build": "echo \"client build script not yet configured\"",
+    "test": "echo \"client tests not yet configured\""
+  }
+}

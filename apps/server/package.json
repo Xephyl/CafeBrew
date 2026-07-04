@@ -1,0 +1,10 @@
+{
+  "name": "server",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "echo \"server dev script not yet configured\"",
+    "test": "echo \"server tests not yet configured\""
+  }
+}
