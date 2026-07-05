@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["packages/shared/src/*"]
+    },
+    "checkJs": false
+  },
+  "include": ["apps/**/*.js", "apps/**/*.jsx", "packages/**/*.js"],
+  "exclude": ["node_modules", "dist", "build"]
+}
