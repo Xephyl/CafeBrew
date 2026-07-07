@@ -1,7 +1,14 @@
-// Re-exports enums and pulls in JSDoc typedefs from types/ for editor intellisense.
+// Barrel file: exports enums, schemas, and utils
 export * from "./enums.js"
+export * from "./schemas/auth.schemas.js"
+export * from "./schemas/product.schemas.js"
+export * from "./schemas/cart.schemas.js"
+export * from "./schemas/order.schemas.js"
+export * from "./schemas/payment.schemas.js"
+export * from "./utils/format.js"
+export * from "./utils/string.js"
 
-// Typedef-only modules (no runtime exports) - imported for JSDoc resolution.
+// JSDoc typedefs (editor intellisense only)
 import "./types/user.js"
 import "./types/product.js"
 import "./types/category.js"
