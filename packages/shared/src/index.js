@@ -7,6 +7,7 @@ export * from "./schemas/order.schemas.js"
 export * from "./schemas/payment.schemas.js"
 export * from "./utils/format.js"
 export * from "./utils/string.js"
+export * from "./constants/api.routes.js"
 
 // JSDoc typedefs (editor intellisense only)
 import "./types/user.js"
