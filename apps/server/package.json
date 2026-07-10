@@ -7,9 +7,11 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+    "seed": "node src/scripts/seed.js",
     "test": "echo \"server tests not yet configured\""
   },
   "dependencies": {
+    "@shared/core": "workspace:^",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
