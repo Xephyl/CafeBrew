@@ -28,5 +28,4 @@ export const ProductStatus = Object.freeze({
 export const PaymentMethod = Object.freeze({
   XENDIT_INVOICE: 'XENDIT_INVOICE',
   CASH_ON_PICKUP: 'CASH_ON_PICKUP',
-  
 })
