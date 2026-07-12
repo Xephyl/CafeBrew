@@ -1,9 +1,7 @@
-// apps/server/src/models/__tests__/user.model.test.js
-// Run once mongodb-memory-server is in place (Task 1-12) — shown here for
-// early manual verification via a standalone script in the meantime.
+// This script is used to verify the User model
 import User from "../user.model.js"
 
-// Happy path: password is hashed, comparePassword works
+// Create a test user
 const u1 = new User({
   email: "test@cafe.com",
   password: "Password1",
@@ -19,7 +17,7 @@ console.assert(await u1.comparePassword("wrong") === false, "wrong password shou
 const safe = u1.toSafeObject()
 console.assert(!("password" in safe) && !("refreshTokenHash" in safe), "safe object must strip sensitive fields")
 
-// Duplicate email
+// Test duplicate email
 try {
   await new User({ email: "test@cafe.com", password: "Password1", firstName: "B", lastName: "C" }).save()
   console.assert(false, "duplicate email should have thrown")

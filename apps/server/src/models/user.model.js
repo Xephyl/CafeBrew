@@ -1,4 +1,4 @@
-import { UserRole } from "@shared"
+import { UserRole } from "@shared/core"
 import bcrypt from "bcryptjs"
 import mongoose from "mongoose"
 
@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      select: false, // Don't return password by default
+      select: false,
     },
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
@@ -48,15 +48,10 @@ const userSchema = new mongoose.Schema(
 )
 
 // Hash password before saving
-userSchema.pre("save", async function hashPassword(next) {
-  if (!this.isModified("password")) return next()
+userSchema.pre("save", async function hashPassword() {
+  if (!this.isModified("password")) return
 
-  try {
-    this.password = await bcrypt.hash(this.password, SALT_ROUNDS)
-    next()
-  } catch (err) {
-    next(err)
-  }
+  this.password = await bcrypt.hash(this.password, SALT_ROUNDS)
 })
 
 userSchema.methods.comparePassword = async function comparePassword(candidate) {
