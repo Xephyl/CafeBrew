@@ -1,8 +1,9 @@
 import { LoginSchema, RegisterSchema } from "@shared/core"
 
 import { config } from "../config/index.js"
-import { issueTokenPair, loginUser, registerUser } from "../services/auth.service.js"
+import { issueTokenPair, loginUser, refreshTokens, registerUser } from "../services/auth.service.js"
 import { success } from "../utils/apiResponse.js"
+import { AppError } from "../utils/AppError.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 
 const REFRESH_COOKIE_NAME = "refreshToken"
@@ -38,4 +39,17 @@ export const login = asyncHandler(async (req, res) => {
 
   setRefreshCookie(res, refreshToken)
   res.status(200).json(success({ user: user.toSafeObject(), accessToken }))
+})
+
+// Refresh controller
+export const refresh = asyncHandler(async (req, res) => {
+  const incomingToken = req.cookies?.[REFRESH_COOKIE_NAME]
+  if (!incomingToken) {
+    throw new AppError(401, "REFRESH_TOKEN_MISSING", "Refresh token is missing")
+  }
+
+  const { accessToken, refreshToken } = await refreshTokens(incomingToken)
+
+  setRefreshCookie(res, refreshToken)
+  res.status(200).json(success({ accessToken }))
 })
