@@ -1,6 +1,11 @@
 import User from '../models/user.model.js'
 import { AppError } from '../utils/AppError.js'
-import { hashRefreshToken, signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/token.js'
+import {
+  hashRefreshToken,
+  signAccessToken,
+  signRefreshToken,
+  verifyRefreshToken,
+} from '../utils/token.js'
 
 // Register user and return user object
 export async function registerUser({ email, password, firstName, lastName }) {
@@ -51,17 +56,17 @@ export async function refreshTokens(refreshToken) {
   try {
     payload = verifyRefreshToken(refreshToken)
   } catch {
-    throw new AppError(401, "REFRESH_TOKEN_INVALID", "Refresh token is invalid or expired")
+    throw new AppError(401, 'REFRESH_TOKEN_INVALID', 'Refresh token is invalid or expired')
   }
 
-  const user = await User.findById(payload.sub).select("+refreshTokenHash")
+  const user = await User.findById(payload.sub).select('+refreshTokenHash')
   if (!user?.refreshTokenHash) {
-    throw new AppError(401, "REFRESH_TOKEN_INVALID", "Refresh token is invalid or expired")
+    throw new AppError(401, 'REFRESH_TOKEN_INVALID', 'Refresh token is invalid or expired')
   }
 
   const incomingHash = hashRefreshToken(refreshToken)
   if (incomingHash !== user.refreshTokenHash) {
-    throw new AppError(401, "REFRESH_TOKEN_INVALID", "Refresh token is invalid or expired")
+    throw new AppError(401, 'REFRESH_TOKEN_INVALID', 'Refresh token is invalid or expired')
   }
 
   // Rotate tokens
