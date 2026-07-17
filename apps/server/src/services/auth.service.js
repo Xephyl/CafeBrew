@@ -72,3 +72,13 @@ export async function refreshTokens(refreshToken) {
   // Rotate tokens
   return issueTokenPair(user)
 }
+
+// Logout user and clear refresh token
+export async function logoutUser(userId) {
+  const user = await User.findById(userId)
+  if (!user) {
+    return
+  }
+  user.refreshTokenHash = undefined
+  await user.save()
+}

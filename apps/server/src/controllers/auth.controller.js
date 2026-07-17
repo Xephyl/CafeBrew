@@ -1,7 +1,8 @@
 import { LoginSchema, RegisterSchema } from "@shared/core"
 
 import { config } from "../config/index.js"
-import { issueTokenPair, loginUser, refreshTokens, registerUser } from "../services/auth.service.js"
+import User from "../models/user.model.js"
+import { issueTokenPair, logoutUser, loginUser, refreshTokens, registerUser } from "../services/auth.service.js"
 import { success } from "../utils/apiResponse.js"
 import { AppError } from "../utils/AppError.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
@@ -52,4 +53,19 @@ export const refresh = asyncHandler(async (req, res) => {
 
   setRefreshCookie(res, refreshToken)
   res.status(200).json(success({ accessToken }))
+})
+
+// Logout controller
+export const logout = asyncHandler(async (req, res) => {
+  if (req.user?.sub) {
+    await logoutUser(req.user.sub)
+  }
+  res.clearCookie(REFRESH_COOKIE_NAME)
+  res.status(200).json(success({ message: "Logged out" }))
+})
+
+// Me controller
+export const me = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.sub)
+  res.status(200).json(success({ user: user.toSafeObject() }))
 })
