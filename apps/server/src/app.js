@@ -19,7 +19,6 @@ export function createApp() {
   app.use(cors({ origin: config.CORS_ORIGIN, credentials: true }))
   app.use(morgan(config.NODE_ENV === 'production' ? 'combined' : 'dev'))
   app.use(express.json())
-  app.use(express.json())
   app.use(cookieParser())
 
   // Health check endpoint
