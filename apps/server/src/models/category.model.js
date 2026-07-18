@@ -14,11 +14,10 @@ const categorySchema = new mongoose.Schema(
 )
 
 // Generate slug from name
-categorySchema.pre('save', function generateSlug(next) {
-  if (this.isModified('name')) {
+categorySchema.pre("save", function generateSlug() {
+  if (this.isModified("name")) {
     this.slug = slugify(this.name)
   }
-  next()
 })
 
 const Category = mongoose.model('Category', categorySchema)
