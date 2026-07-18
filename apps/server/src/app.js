@@ -9,6 +9,7 @@ import { config } from './config/index.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { notFound } from './middleware/notFound.js'
 import authRoutes from './routes/auth.routes.js'
+import categoryRoutes from './routes/category.routes.js'
 import { success } from './utils/apiResponse.js'
 
 export function createApp() {
@@ -33,6 +34,7 @@ export function createApp() {
   })
 
   app.use('/api/auth', authRoutes)
+  app.use('/api/categories', categoryRoutes)
 
   // 404 handler (must be after all routes)
   app.use(notFound)
