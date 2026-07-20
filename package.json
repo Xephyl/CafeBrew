@@ -5,6 +5,7 @@
   "packageManager": "pnpm@9.0.0",
   "scripts": {
     "dev:server": "pnpm --filter server dev",
+    "seed": "pnpm --filter server seed",
     "dev:client": "pnpm --filter client dev",
     "test:server": "pnpm --filter server test",
     "test:client": "pnpm --filter client test",

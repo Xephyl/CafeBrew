@@ -1,21 +1,27 @@
-import { LoginSchema, RegisterSchema } from "@shared/core"
+import { LoginSchema, RegisterSchema } from '@shared/core'
 
-import { config } from "../config/index.js"
-import User from "../models/user.model.js"
-import { issueTokenPair, logoutUser, loginUser, refreshTokens, registerUser } from "../services/auth.service.js"
-import { success } from "../utils/apiResponse.js"
-import { AppError } from "../utils/AppError.js"
-import { asyncHandler } from "../utils/asyncHandler.js"
+import { config } from '../config/index.js'
+import User from '../models/user.model.js'
+import {
+  issueTokenPair,
+  logoutUser,
+  loginUser,
+  refreshTokens,
+  registerUser,
+} from '../services/auth.service.js'
+import { success } from '../utils/apiResponse.js'
+import { AppError } from '../utils/AppError.js'
+import { asyncHandler } from '../utils/asyncHandler.js'
 
-const REFRESH_COOKIE_NAME = "refreshToken"
+const REFRESH_COOKIE_NAME = 'refreshToken'
 const REFRESH_COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
 
 // Set refresh cookie helper
 function setRefreshCookie(res, refreshToken) {
   res.cookie(REFRESH_COOKIE_NAME, refreshToken, {
     httpOnly: true,
-    secure: config.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: config.NODE_ENV === 'production',
+    sameSite: 'strict',
     maxAge: REFRESH_COOKIE_MAX_AGE_MS,
   })
 }
@@ -46,7 +52,7 @@ export const login = asyncHandler(async (req, res) => {
 export const refresh = asyncHandler(async (req, res) => {
   const incomingToken = req.cookies?.[REFRESH_COOKIE_NAME]
   if (!incomingToken) {
-    throw new AppError(401, "REFRESH_TOKEN_MISSING", "Refresh token is missing")
+    throw new AppError(401, 'REFRESH_TOKEN_MISSING', 'Refresh token is missing')
   }
 
   const { accessToken, refreshToken } = await refreshTokens(incomingToken)
@@ -61,7 +67,7 @@ export const logout = asyncHandler(async (req, res) => {
     await logoutUser(req.user.sub)
   }
   res.clearCookie(REFRESH_COOKIE_NAME)
-  res.status(200).json(success({ message: "Logged out" }))
+  res.status(200).json(success({ message: 'Logged out' }))
 })
 
 // Me controller

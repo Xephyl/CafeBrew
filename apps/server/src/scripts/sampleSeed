@@ -1,0 +1,224 @@
+$ErrorActionPreference = "Stop"
+
+if (-not (Test-Path "apps/server/src/scripts/seed.js")) {
+    Write-Host "seed.js not found — Task 0-09 must be done first." -ForegroundColor Yellow
+    exit 1
+}
+
+$seedScript = @'
+import { createInterface } from "node:readline/promises"
+
+import { ProductStatus, UserRole } from "@shared/core"
+import mongoose from "mongoose"
+
+import { connectDB } from "../config/database.js"
+import { config } from "../config/index.js"
+import Category from "../models/category.model.js"
+import Product from "../models/product.model.js"
+import User from "../models/user.model.js"
+
+if (config.NODE_ENV === "production") {
+  console.error("Refusing to run seed script in production (NODE_ENV=production).")
+  process.exit(1)
+}
+
+const ADMIN_EMAIL = "admin@cafe-ecommerce.local"
+const ADMIN_PASSWORD = "Admin1234"
+
+const CUSTOMERS = [
+  { email: "customer1@cafe-ecommerce.local", firstName: "Ana", lastName: "Reyes" },
+  { email: "customer2@cafe-ecommerce.local", firstName: "Ben", lastName: "Santos" },
+  { email: "customer3@cafe-ecommerce.local", firstName: "Cara", lastName: "Cruz" },
+]
+const CUSTOMER_PASSWORD = "Customer1234"
+
+const CATEGORY_DEFS = [
+  { name: "Hot Drinks", displayOrder: 1 },
+  { name: "Cold Drinks", displayOrder: 2 },
+  { name: "Pastries", displayOrder: 3 },
+  { name: "Merchandise", displayOrder: 4 },
+]
+
+const PRODUCT_DEFS = {
+  "Hot Drinks": [
+    { name: "Cafe Americano", price: 12000 },
+    { name: "Caramel Macchiato", price: 15000 },
+    { name: "Spanish Latte", price: 14000 },
+  ],
+  "Cold Drinks": [
+    { name: "Iced Caramel Macchiato", price: 16000 },
+    { name: "Cold Brew", price: 13000 },
+    { name: "Strawberry Refresher", price: 14500 },
+  ],
+  Pastries: [
+    { name: "Butter Croissant", price: 9000 },
+    { name: "Pain au Chocolat", price: 9500 },
+    { name: "Blueberry Muffin", price: 8500 },
+  ],
+  Merchandise: [
+    { name: "Ceramic Mug", price: 25000 },
+    { name: "Tote Bag", price: 30000 },
+    { name: "Whole Bean Coffee 250g", price: 45000 },
+  ],
+}
+
+// --- Individual seed modules — each owns its own clear + create, scoped to
+// only the collection it's responsible for. Never deletes a collection it
+// isn't also about to reseed. ---
+
+async function seedUsers() {
+  console.log("Clearing existing users...")
+  await User.deleteMany({})
+
+  console.log("Seeding admin user...")
+  await User.create({
+    email: ADMIN_EMAIL,
+    password: ADMIN_PASSWORD,
+    firstName: "Admin",
+    lastName: "User",
+    role: UserRole.ADMIN,
+  })
+
+  console.log("Seeding customer users...")
+  for (const customer of CUSTOMERS) {
+    await User.create({ ...customer, password: CUSTOMER_PASSWORD, role: UserRole.CUSTOMER })
+  }
+
+  console.log("Users seeded.")
+  console.log(`  Admin:    ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`)
+  console.log(`  Customer: ${CUSTOMERS[0].email} / ${CUSTOMER_PASSWORD} (+ ${CUSTOMERS.length - 1} more)`)
+}
+
+async function seedCategories() {
+  console.log("Clearing existing categories...")
+  await Category.deleteMany({})
+
+  console.log("Seeding categories...")
+  for (const def of CATEGORY_DEFS) {
+    await Category.create({ name: def.name, displayOrder: def.displayOrder })
+  }
+
+  console.log(`Categories seeded (${CATEGORY_DEFS.length}).`)
+}
+
+// Products reference Category by ObjectId. If categories weren't also
+// selected this run, they must already exist in the DB — never create a
+// product with a dangling/guessed category ref.
+async function seedProducts() {
+  const existingCategories = await Category.find({})
+  const categoryMap = Object.fromEntries(existingCategories.map((c) => [c.name, c]))
+
+  const missing = Object.keys(PRODUCT_DEFS).filter((name) => !categoryMap[name])
+  if (missing.length > 0) {
+    console.error(
+      `Cannot seed products — missing categories: ${missing.join(", ")}. ` +
+      "Run categories seed first (select it in this same run, or run it separately)."
+    )
+    process.exitCode = 1
+    return
+  }
+
+  console.log("Clearing existing products...")
+  await Product.deleteMany({})
+
+  console.log("Seeding products...")
+  for (const [categoryName, products] of Object.entries(PRODUCT_DEFS)) {
+    const category = categoryMap[categoryName]
+    for (const productDef of products) {
+      await Product.create({
+        name: productDef.name,
+        description: `${productDef.name} from our ${categoryName.toLowerCase()} menu.`,
+        price: productDef.price,
+        category: category._id,
+        status: ProductStatus.ACTIVE,
+        imageUrls: [],
+        variants: [
+          { name: "Small", priceModifier: 0, stock: 50 },
+          { name: "Large", priceModifier: 2000, stock: 50 },
+        ],
+      })
+    }
+  }
+
+  const total = Object.values(PRODUCT_DEFS).reduce((sum, arr) => sum + arr.length, 0)
+  console.log(`Products seeded (${total}).`)
+}
+
+const MODULES = [
+  { key: "users", label: "Users (admin + customers)", run: seedUsers },
+  { key: "categories", label: "Categories", run: seedCategories },
+  { key: "products", label: "Products (requires categories to exist)", run: seedProducts },
+]
+
+// --- Selection: CLI flags (scriptable) or interactive menu (default) ---
+
+function parseFlagSelection(argv) {
+  const flags = argv.slice(2)
+  if (flags.length === 0) return null
+
+  if (flags.includes("--all")) return MODULES.map((m) => m.key)
+
+  const selected = MODULES.filter((m) => flags.includes(`--${m.key}`)).map((m) => m.key)
+  return selected.length > 0 ? selected : null
+}
+
+async function promptSelection() {
+  console.log("\nAvailable seed modules:")
+  MODULES.forEach((m, i) => console.log(`  ${i + 1}. ${m.label}`))
+  console.log("\nEnter numbers separated by commas (e.g. 1,3), or \"all\":")
+
+  const rl = createInterface({ input: process.stdin, output: process.stdout })
+  const answer = (await rl.question("> ")).trim().toLowerCase()
+  rl.close()
+
+  if (answer === "all") return MODULES.map((m) => m.key)
+
+  const indices = answer
+    .split(",")
+    .map((s) => parseInt(s.trim(), 10))
+    .filter((n) => !Number.isNaN(n) && n >= 1 && n <= MODULES.length)
+
+  if (indices.length === 0) {
+    console.error("No valid selection made. Exiting.")
+    process.exit(1)
+  }
+
+  return indices.map((i) => MODULES[i - 1].key)
+}
+
+async function seed() {
+  await connectDB(config.MONGODB_URI)
+
+  const flagSelection = parseFlagSelection(process.argv)
+  const selectedKeys = flagSelection ?? (await promptSelection())
+
+  console.log(`\nRunning: ${selectedKeys.join(", ")}\n`)
+
+  for (const key of selectedKeys) {
+    const module = MODULES.find((m) => m.key === key)
+    await module.run()
+    console.log("")
+  }
+
+  console.log("Seed complete.")
+  await mongoose.connection.close()
+  console.log("Disconnected.")
+}
+
+try {
+  await seed()
+} catch (err) {
+  console.error("Seed failed:", err)
+  process.exit(1)
+}
+'@
+
+Set-Content -Path "apps/server/src/scripts/seed.js" -Value $seedScript -Encoding utf8
+
+# Mandatory post-patch verification
+$verify = Get-Content "apps/server/src/scripts/seed.js" -Raw
+if ($verify -notmatch "async function promptSelection" -or $verify -notmatch "async function seedProducts") {
+    Write-Host "PATCH FAILED — expected functions not found in seed.js." -ForegroundColor Red
+    exit 1
+}
+Write-Host "Verified: seed.js rewritten with selective seeding" -ForegroundColor Green
