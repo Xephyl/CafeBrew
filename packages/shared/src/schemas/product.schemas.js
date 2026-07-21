@@ -5,7 +5,7 @@ import { ProductStatus } from '../enums.js'
 const variantSchema = z.object({
   name: z.string().min(1),
   priceModifier: z.number().int(),
-  stock: z.string().min(0),
+  stock: z.number().int().min(0),
 })
 
 export const CreateProductSchema = z.object({
