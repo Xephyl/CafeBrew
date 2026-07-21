@@ -1,5 +1,5 @@
-import { ProductStatus, slugify } from "@shared/core"
-import mongoose from "mongoose"
+import { ProductStatus, slugify } from '@shared/core'
+import mongoose from 'mongoose'
 
 // Product variant schema
 const variantSchema = new mongoose.Schema(
@@ -25,10 +25,10 @@ const productSchema = new mongoose.Schema(
       min: 0,
       validate: {
         validator: Number.isInteger,
-        message: "price must be an integer (PHP centavos), not a float",
+        message: 'price must be an integer (PHP centavos), not a float',
       },
     },
-    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
+    category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
     variants: { type: [variantSchema], default: [] },
     imageUrls: { type: [String], default: [] },
     status: {
@@ -41,17 +41,17 @@ const productSchema = new mongoose.Schema(
 )
 
 // Generate slug before saving
-productSchema.pre("save", function generateSlug() {
-  if (this.isModified("name")) {
+productSchema.pre('save', function generateSlug() {
+  if (this.isModified('name')) {
     this.slug = slugify(this.name)
   }
 })
 
 // Text index for search
-productSchema.index({ name: "text", description: "text" })
+productSchema.index({ name: 'text', description: 'text' })
 
 // Compound index for category + status queries
 productSchema.index({ category: 1, status: 1 })
 
-const Product = mongoose.model("Product", productSchema)
+const Product = mongoose.model('Product', productSchema)
 export default Product
