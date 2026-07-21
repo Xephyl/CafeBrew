@@ -26,7 +26,7 @@ function setRefreshCookie(res, refreshToken) {
   })
 }
 
-// Register controller
+// POST /api/auth/register
 export const register = asyncHandler(async (req, res) => {
   const data = RegisterSchema.parse(req.body)
 
@@ -37,7 +37,7 @@ export const register = asyncHandler(async (req, res) => {
   res.status(201).json(success({ user: user.toSafeObject(), accessToken }))
 })
 
-// Login controller
+// POST /api/auth/login
 export const login = asyncHandler(async (req, res) => {
   const data = LoginSchema.parse(req.body)
 
@@ -48,7 +48,7 @@ export const login = asyncHandler(async (req, res) => {
   res.status(200).json(success({ user: user.toSafeObject(), accessToken }))
 })
 
-// Refresh controller
+// POST /api/auth/refresh
 export const refresh = asyncHandler(async (req, res) => {
   const incomingToken = req.cookies?.[REFRESH_COOKIE_NAME]
   if (!incomingToken) {
@@ -61,7 +61,7 @@ export const refresh = asyncHandler(async (req, res) => {
   res.status(200).json(success({ accessToken }))
 })
 
-// Logout controller
+// POST /api/auth/logout
 export const logout = asyncHandler(async (req, res) => {
   if (req.user?.sub) {
     await logoutUser(req.user.sub)
@@ -70,7 +70,7 @@ export const logout = asyncHandler(async (req, res) => {
   res.status(200).json(success({ message: 'Logged out' }))
 })
 
-// Me controller
+// GET /api/auth/me
 export const me = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.sub)
   res.status(200).json(success({ user: user.toSafeObject() }))
