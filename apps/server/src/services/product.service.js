@@ -18,7 +18,7 @@ export async function updateProduct( id, data) {
 
     const { categoryId, ...rest } = data
     for (const [key, value] of Object.entries(rest)) {
-        if (value != undefined) product[key] = value 
+        if (value != undefined) product[key] = value
     }
     if (categoryId != undefined) product.category = categoryId
 

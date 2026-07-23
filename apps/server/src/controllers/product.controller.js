@@ -46,8 +46,8 @@ export const listProducts = asyncHandler(async (req, res) => {
     query.$text = { $search: search }
   }
 
-  const pageNum = Math.max(1, parseInt(page, 10) || 1)
-  const limitNum = Math.max(1, parseInt(limit, 10) || 20)
+  const pageNum = Math.max(1, Number.parseInt(page, 10) || 1)
+  const limitNum = Math.max(1, Number.parseInt(limit, 10) || 20)
   const skip = (pageNum - 1) * limitNum
 
   const [products, total] = await Promise.all([
