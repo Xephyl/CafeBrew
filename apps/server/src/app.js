@@ -9,6 +9,7 @@ import { config } from './config/index.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { notFound } from './middleware/notFound.js'
 import authRoutes from './routes/auth.routes.js'
+import cartRoutes from './routes/cart.routes.js'
 import categoryRoutes from './routes/category.routes.js'
 import productRoutes from './routes/product.routes.js'
 import { success } from './utils/apiResponse.js'
@@ -37,6 +38,7 @@ export function createApp() {
   app.use('/api/auth', authRoutes)
   app.use('/api/categories', categoryRoutes)
   app.use('/api/products', productRoutes)
+  app.use('/api/cart', cartRoutes)
 
   // 404 handler (must be after all routes)
   app.use(notFound)
