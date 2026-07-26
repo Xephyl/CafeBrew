@@ -16,7 +16,7 @@ export async function getOrCreateCart(userId) {
 // Add item to cart
 export async function addItemToCart(userId, { productId, variantId, quantity }) {
   const product = await Product.findById(productId)
-  if (product?.status !== "ACTIVE") {
+  if (!product || product.status !== "ACTIVE") {
     throw new AppError(422, "PRODUCT_NOT_AVAILABLE", "This product is not currently available")
   }
 
@@ -25,7 +25,10 @@ export async function addItemToCart(userId, { productId, variantId, quantity }) 
     throw new AppError(422, "PRODUCT_NOT_AVAILABLE", "This variant is not currently available")
   }
 
-  const cart = await getOrCreateCart(userId)
+  let cart = await Cart.findOne({ user: userId })
+  if (!cart) {
+    cart = await Cart.create({ user: userId, items: [] })
+  }
 
   const existingItem = cart.items.find(
     (item) => item.product.toString() === productId && item.variantId.toString() === variantId
@@ -39,7 +42,7 @@ export async function addItemToCart(userId, { productId, variantId, quantity }) 
   }
 
   await cart.save()
-  return getOrCreateCart(userId)
+  return Cart.findOne({ user: userId }).populate("items.product")
 }
 
 // Update cart item quantity
