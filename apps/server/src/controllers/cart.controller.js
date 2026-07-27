@@ -1,4 +1,5 @@
 import { AddToCartSchema } from "@shared/core"
+import { z } from "zod"
 
 import {
   addItemToCart,
@@ -9,6 +10,10 @@ import {
 } from "../services/cart.service.js"
 import { success } from "../utils/apiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
+
+const CartItemQuantitySchema = z.object({
+  quantity: AddToCartSchema.shape.quantity,
+})
 
 // GET /api/cart — requires authenticate, lazy-creates an empty cart on first access
 export const getCart = asyncHandler(async (req, res) => {
@@ -25,7 +30,7 @@ export const addItem = asyncHandler(async (req, res) => {
 
 // PATCH /api/cart/items/:itemId — update quantity
 export const updateItem = asyncHandler(async (req, res) => {
-  const { quantity } = req.body
+  const { quantity } = CartItemQuantitySchema.parse(req.body)
   const cart = await updateCartItemQuantity(req.user.sub, req.params.itemId, quantity)
   res.status(200).json(success({ cart }))
 })
