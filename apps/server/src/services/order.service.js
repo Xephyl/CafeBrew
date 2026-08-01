@@ -113,3 +113,88 @@ export async function placeOrder(userId, { cartId, addressId, paymentMethod }) {
 
   return order
 }
+
+// List orders with pagination and filtering
+export async function listOrders({ status, paymentStatus, search, page = 1, limit = 20 }) {
+  const query = {}
+  if (status) query.status = status
+  if (paymentStatus) query.paymentStatus = paymentStatus
+  if (search) query.orderNumber = { $regex: search, $options: "i" }
+
+  const pageNum = Math.max(1, parseInt(page, 10) || 1)
+  const limitNum = Math.max(1, parseInt(limit, 10) || 20)
+  const skip = (pageNum - 1) * limitNum
+
+  const [orders, total] = await Promise.all([
+    Order.find(query).sort({ createdAt: -1 }).skip(skip).limit(limitNum),
+    Order.countDocuments(query),
+  ])
+
+  return {
+    orders,
+    pagination: { total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) },
+  }
+}
+
+// Get order by ID
+export async function getOrderById(orderId) {
+  const order = await Order.findById(orderId)
+  if (!order) {
+    throw new AppError(404, "ORDER_NOT_FOUND", "Order not found")
+  }
+  return order
+}
+
+// Update order status
+export async function updateOrderStatus(orderId, newStatus, note) {
+  const order = await Order.findById(orderId)
+  if (!order) {
+    throw new AppError(404, "ORDER_NOT_FOUND", "Order not found")
+  }
+
+  try {
+    order.transitionStatus(newStatus, note)
+  } catch (err) {
+    throw new AppError(err.statusCode || 422, err.code || "INVALID_STATUS_TRANSITION", err.message, err.details)
+  }
+
+  await order.save()
+  return order
+}
+
+// Cancel order
+export async function cancelOrder(orderId, reason) {
+  const order = await Order.findById(orderId)
+  if (!order) {
+    throw new AppError(404, "ORDER_NOT_FOUND", "Order not found")
+  }
+
+  if (!["PENDING", "CONFIRMED"].includes(order.status)) {
+    throw new AppError(422, "ORDER_CANNOT_BE_CANCELLED", "Only pending or confirmed orders can be cancelled")
+  }
+
+  // Restore stock for every item
+  const productDocs = new Map()
+  for (const item of order.items) {
+    const productId = item.product.toString()
+    if (!productDocs.has(productId)) {
+      const product = await Product.findById(productId)
+      if (product) productDocs.set(productId, product)
+    }
+    const product = productDocs.get(productId)
+    if (product) {
+      const variant = product.variants.id(item.variantId)
+      if (variant) variant.stock += item.quantity
+    }
+  }
+  await Promise.all([...productDocs.values()].map((p) => p.save()))
+
+  try {
+    order.transitionStatus("CANCELLED", reason)
+  } catch (err) {
+    throw new AppError(err.statusCode || 422, err.code || "INVALID_STATUS_TRANSITION", err.message, err.details)
+  }
+
+  await order.save()
+  return order
+}
