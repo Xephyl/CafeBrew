@@ -119,10 +119,10 @@ export async function listOrders({ status, paymentStatus, search, page = 1, limi
   const query = {}
   if (status) query.status = status
   if (paymentStatus) query.paymentStatus = paymentStatus
-  if (search) query.orderNumber = { $regex: search, $options: "i" }
+  if (search) query.orderNumber = { $regex: search, $options: 'i' }
 
-  const pageNum = Math.max(1, parseInt(page, 10) || 1)
-  const limitNum = Math.max(1, parseInt(limit, 10) || 20)
+  const pageNum = Math.max(1, Number.parseInt(page, 10) || 1)
+  const limitNum = Math.max(1, Number.parseInt(limit, 10) || 20)
   const skip = (pageNum - 1) * limitNum
 
   const [orders, total] = await Promise.all([
@@ -140,7 +140,7 @@ export async function listOrders({ status, paymentStatus, search, page = 1, limi
 export async function getOrderById(orderId) {
   const order = await Order.findById(orderId)
   if (!order) {
-    throw new AppError(404, "ORDER_NOT_FOUND", "Order not found")
+    throw new AppError(404, 'ORDER_NOT_FOUND', 'Order not found')
   }
   return order
 }
@@ -149,13 +149,18 @@ export async function getOrderById(orderId) {
 export async function updateOrderStatus(orderId, newStatus, note) {
   const order = await Order.findById(orderId)
   if (!order) {
-    throw new AppError(404, "ORDER_NOT_FOUND", "Order not found")
+    throw new AppError(404, 'ORDER_NOT_FOUND', 'Order not found')
   }
 
   try {
     order.transitionStatus(newStatus, note)
   } catch (err) {
-    throw new AppError(err.statusCode || 422, err.code || "INVALID_STATUS_TRANSITION", err.message, err.details)
+    throw new AppError(
+      err.statusCode || 422,
+      err.code || 'INVALID_STATUS_TRANSITION',
+      err.message,
+      err.details
+    )
   }
 
   await order.save()
@@ -166,11 +171,15 @@ export async function updateOrderStatus(orderId, newStatus, note) {
 export async function cancelOrder(orderId, reason) {
   const order = await Order.findById(orderId)
   if (!order) {
-    throw new AppError(404, "ORDER_NOT_FOUND", "Order not found")
+    throw new AppError(404, 'ORDER_NOT_FOUND', 'Order not found')
   }
 
-  if (!["PENDING", "CONFIRMED"].includes(order.status)) {
-    throw new AppError(422, "ORDER_CANNOT_BE_CANCELLED", "Only pending or confirmed orders can be cancelled")
+  if (!['PENDING', 'CONFIRMED'].includes(order.status)) {
+    throw new AppError(
+      422,
+      'ORDER_CANNOT_BE_CANCELLED',
+      'Only pending or confirmed orders can be cancelled'
+    )
   }
 
   // Restore stock for every item
@@ -190,9 +199,14 @@ export async function cancelOrder(orderId, reason) {
   await Promise.all([...productDocs.values()].map((p) => p.save()))
 
   try {
-    order.transitionStatus("CANCELLED", reason)
+    order.transitionStatus('CANCELLED', reason)
   } catch (err) {
-    throw new AppError(err.statusCode || 422, err.code || "INVALID_STATUS_TRANSITION", err.message, err.details)
+    throw new AppError(
+      err.statusCode || 422,
+      err.code || 'INVALID_STATUS_TRANSITION',
+      err.message,
+      err.details
+    )
   }
 
   await order.save()

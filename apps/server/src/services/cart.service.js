@@ -16,7 +16,7 @@ export async function getOrCreateCart(userId) {
 // Add item to cart
 export async function addItemToCart(userId, { productId, variantId, quantity }) {
   const product = await Product.findById(productId)
-  if (!product || product.status !== "ACTIVE") {
+  if (product?.status !== "ACTIVE") {
     throw new AppError(422, "PRODUCT_NOT_AVAILABLE", "This product is not currently available")
   }
 
