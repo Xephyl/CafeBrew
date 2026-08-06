@@ -46,6 +46,7 @@ const paymentSchema = new mongoose.Schema(
   {
     provider: { type: String },
     invoiceId: { type: String },
+    invoiceUrl: { type: String },
     status: { type: String },
     paidAt: { type: Date },
   },
