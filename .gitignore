@@ -21,3 +21,6 @@ Thumbs.db
 # Editor
 .vscode/*
 !.vscode/settings.json
+
+# Skills
+SKILLS.md
