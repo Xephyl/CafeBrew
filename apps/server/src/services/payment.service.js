@@ -1,3 +1,5 @@
+import crypto from "node:crypto"
+
 import { config } from "../config/index.js"
 import Order from "../models/order.model.js"
 import { AppError } from "../utils/AppError.js"
@@ -27,6 +29,7 @@ export async function createInvoice(order) {
         description: `Payment for order ${order.orderNumber}`,
       }),
     })
+  // eslint-disable-next-line no-unused-vars
   } catch (err) {
     throw new AppError(502, "PAYMENT_PROVIDER_ERROR", "Unable to reach the payment provider")
   }
@@ -67,4 +70,25 @@ export async function requestInvoiceForOrder(userId, orderId) {
   await order.save()
 
   return invoiceUrl
+}
+
+// Verifies the webhook token
+export function verifyWebhookToken(receivedToken) {
+  if (!receivedToken) return false
+
+  const expected = Buffer.from(config.XENDIT_CALLBACK_TOKEN)
+  const received = Buffer.from(receivedToken)
+
+  if (expected.length !== received.length) {
+    return false
+  }
+
+  return crypto.timingSafeEqual(expected, received)
+}
+
+// Logs the raw webhook payload
+export function logRawWebhookPayload(payload) {
+  console.log("=== RAW XENDIT WEBHOOK PAYLOAD ===")
+  console.log(JSON.stringify(payload, null, 2))
+  console.log("===================================")
 }
