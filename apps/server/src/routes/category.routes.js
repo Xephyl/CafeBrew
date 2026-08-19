@@ -12,8 +12,11 @@ import { authorize } from "../middleware/authorize.js"
 
 const router = Router()
 
+// Public routes (no authentication required)
 router.get("/", listCategories)
 router.get("/:slug", getCategoryBySlug)
+
+// Admin-only routes
 router.post("/", authenticate, authorize("ADMIN"), createCategory)
 router.put("/:id", authenticate, authorize("ADMIN"), updateCategory)
 router.delete("/:id", authenticate, authorize("ADMIN"), deleteCategory)
