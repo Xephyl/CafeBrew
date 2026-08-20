@@ -72,7 +72,7 @@ export async function requestInvoiceForOrder(userId, orderId) {
   return invoiceUrl
 }
 
-// Verifies the webhook token
+// Verify webhook token
 export function verifyWebhookToken(receivedToken) {
   if (!receivedToken) return false
 
@@ -86,9 +86,41 @@ export function verifyWebhookToken(receivedToken) {
   return crypto.timingSafeEqual(expected, received)
 }
 
-// Logs the raw webhook payload
-export function logRawWebhookPayload(payload) {
-  console.log("=== RAW XENDIT WEBHOOK PAYLOAD ===")
-  console.log(JSON.stringify(payload, null, 2))
-  console.log("===================================")
+// Process webhook event
+export async function processWebhookEvent(payload) {
+  const order = await Order.findOne({ "payment.invoiceId": payload.id })
+
+  if (!order) {
+    console.warn(`Webhook received for unknown invoiceId: ${payload.id}`)
+    return
+  }
+
+  if (order.paymentStatus !== "UNPAID") {
+    console.log(`Webhook for invoice ${payload.id} already processed — skipping, idempotent`)
+    return
+  }
+
+  if (payload.status === "PAID") {
+    order.paymentStatus = "PAID"
+    order.payment.status = "PAID"
+    order.payment.paidAt = payload.paid_at ? new Date(payload.paid_at) : new Date()
+
+    try {
+      order.transitionStatus("CONFIRMED", "Payment confirmed via Xendit webhook")
+    } catch (err) {
+      console.error(`transitionStatus failed during webhook processing:`, err.message)
+    }
+
+    await order.save()
+    return
+  }
+
+  if (payload.status === "EXPIRED") {
+    order.paymentStatus = "FAILED"
+    order.payment.status = "EXPIRED"
+    await order.save()
+    return
+  }
+
+  console.log(`Webhook received with unhandled status "${payload.status}" — no action taken`)
 }
