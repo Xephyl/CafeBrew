@@ -14,6 +14,7 @@ import categoryRoutes from './routes/category.routes.js'
 import orderRoutes from './routes/order.routes.js'
 import paymentRoutes from './routes/payment.routes.js'
 import productRoutes from './routes/product.routes.js'
+import uploadRoutes from './routes/upload.routes.js'
 import { success } from './utils/apiResponse.js'
 
 export function createApp() {
@@ -43,6 +44,7 @@ export function createApp() {
   app.use('/api/cart', cartRoutes)
   app.use('/api/orders', orderRoutes)
   app.use('/api/payments', paymentRoutes)
+  app.use('/api/upload', uploadRoutes)
 
   // 404 handler (must be after all routes)
   app.use(notFound)

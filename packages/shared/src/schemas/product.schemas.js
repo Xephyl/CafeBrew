@@ -16,6 +16,7 @@ export const CreateProductSchema = z.object({
   variants: z.array(variantSchema).min(1),
   status: z.enum(Object.values(ProductStatus)),
   imageUrls: z.array(z.string().url()),
+  imagePaths: z.array(z.string()).optional(),
 })
 
 export const UpdateProductSchema = CreateProductSchema.partial()

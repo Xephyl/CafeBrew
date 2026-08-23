@@ -31,6 +31,7 @@ const productSchema = new mongoose.Schema(
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
     variants: { type: [variantSchema], default: [] },
     imageUrls: { type: [String], default: [] },
+    imagePaths: { type: [String], default: [] },
     status: {
       type: String,
       enum: Object.values(ProductStatus),
