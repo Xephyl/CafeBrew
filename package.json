@@ -10,7 +10,8 @@
     "test:server": "pnpm --filter server test",
     "test:client": "pnpm --filter client test",
     "build:client": "pnpm --filter client build",
-    "lint": "pnpm -r run lint"
+    "lint": "pnpm -r run lint",
+    "tree": "node scripts/tree.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
