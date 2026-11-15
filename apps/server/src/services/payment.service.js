@@ -14,6 +14,11 @@ function buildAuthHeader() {
 
 // Creates an invoice with Xendit
 export async function createInvoice(order) {
+  // order.total is stored as integer centavos; Xendit expects major units (pesos)
+  if (!Number.isInteger(order.total)) {
+    throw new AppError(500, "INVALID_ORDER_TOTAL", "Order total is not stored in centavos")
+  }
+
   let response
   try {
     response = await fetch(`${XENDIT_API_BASE}/v2/invoices`, {
@@ -24,7 +29,7 @@ export async function createInvoice(order) {
       },
       body: JSON.stringify({
         external_id: order.orderNumber,
-        amount: order.total,
+        amount: Number((order.total / 100).toFixed(2)),
         currency: "PHP",
         description: `Payment for order ${order.orderNumber}`,
       }),

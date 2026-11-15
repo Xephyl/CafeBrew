@@ -1,9 +1,15 @@
-// Formats currency (PHP by default)
+// Formats currency (PHP by default). `amount` is in MAJOR units (e.g. 1500 → ₱1,500.00).
+// Prices in this project are stored as integer centavos — use formatPrice() for those.
 export function formatCurrency(amount, currency = 'PHP') {
   return new Intl.NumberFormat('en-PH', {
     style: 'currency',
     currency,
   }).format(amount)
+}
+
+// Formats an integer centavos price (the project's storage unit) for display.
+export function formatPrice(centavos, currency = 'PHP') {
+  return formatCurrency(centavos / 100, currency)
 }
 
 // Formats ISO date strings into readable formats
