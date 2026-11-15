@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "echo \"client tests not yet configured\"",
-    "lint": "echo \"client lint not yet configured\""
+    "lint": "eslint ."
   },
   "dependencies": {
     "@shared/core": "workspace:^",

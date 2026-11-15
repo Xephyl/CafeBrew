@@ -4,6 +4,9 @@
   "type": "module",
   "private": true,
   "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint ."
+  },
   "dependencies": {
     "zod": "^3"
   }

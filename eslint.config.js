@@ -67,6 +67,16 @@ export default [
     },
   },
 
+  // Jest globals for the server test suite
+  {
+    files: ["apps/server/src/test/**/*.js"],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      },
+    },
+  },
+
   // Must stay last: turns off stylistic rules that conflict with Prettier
   prettierConfig,
 ]
