@@ -2,10 +2,22 @@
   "name": "client",
   "version": "0.0.1",
   "private": true,
-  "main": "src/index.js",
   "scripts": {
-    "dev": "echo \"client dev script not yet configured\"",
-    "build": "echo \"client build script not yet configured\"",
+    "dev": "vite",
+    "build": "vite build",
     "test": "echo \"client tests not yet configured\""
-  }
+  },
+  "dependencies": {
+    "axios": "^1.21.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
+    "@vitejs/plugin-react": "^6.3.0",
+    "tailwindcss": "^4.3.5",
+    "vite": "^8.3.8"
+  },
+  "type": "module"
 }
