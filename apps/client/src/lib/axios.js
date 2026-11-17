@@ -17,7 +17,10 @@ export function setRefreshHandler(fn) {
 }
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "/api",
+  // API_ROUTES constants already include the /api prefix — baseURL must not.
+  // Empty fallback keeps requests same-origin so the Vite /api proxy applies.
+  baseURL: import.meta.env.VITE_API_URL || "",
+  withCredentials: true,
 })
 
 api.interceptors.request.use((config) => {

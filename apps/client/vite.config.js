@@ -8,6 +8,10 @@ export default defineConfig({
     alias: {
       // @/* -> this app's own src — editor + bundler resolution
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      // "@shared/core" is the real package name (packages/shared/package.json)
+      // — alias it to the package entrypoint. Must precede "@shared" below,
+      // which would otherwise rewrite it to src/core (does not exist).
+      "@shared/core": fileURLToPath(new URL("../../packages/shared/src/index.js", import.meta.url)),
       // @shared/* -> the shared package's source directly, bypassing its
       // own package.json export map. The real importable package name is
       // "@shared/core" (see packages/shared/package.json) — this alias is
