@@ -11,6 +11,7 @@
     "test:client": "pnpm --filter client test",
     "build:client": "pnpm --filter client build",
     "lint": "pnpm -r run lint",
+    "check": "pnpm lint && pnpm build:client",
     "tree": "node scripts/tree.mjs"
   },
   "devDependencies": {
