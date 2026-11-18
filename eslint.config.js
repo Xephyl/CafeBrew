@@ -15,7 +15,7 @@ export default [
 
   // Base rules for all JS files (server + shared)
   {
-    files: ["**/*.js"],
+    files: ["**/*.{js,mjs}"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
