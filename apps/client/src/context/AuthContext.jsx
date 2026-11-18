@@ -76,7 +76,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (bootstrapped.current) return
     bootstrapped.current = true
-    ;(async () => {
+    void (async () => {
       const token = tokenRef.current ?? (await refresh())
       if (token) await fetchMe().catch(() => {})
     })()
