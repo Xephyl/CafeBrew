@@ -18,7 +18,6 @@ const IGNORE_LIST = new Set([
   "package-lock.json",
   "yarn.lock",
   "pnpm-lock.yaml",
-  ".devin", // Private rule folder. Remove this line if your project doesn't use one.
   ".kilo",
   ".next",
   ".nuxt",
