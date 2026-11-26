@@ -13,7 +13,7 @@ Online store for a cafe — customers browse drinks, pastries, and merchandise, 
 
 - Node.js 20 (see `.nvmrc`)
 - pnpm 9
-- MongoDB running locally on `localhost:27017` (no Docker)
+- MongoDB running locally on `localhost:27017`
 
 ## Setup
 
