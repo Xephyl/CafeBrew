@@ -1,10 +1,6 @@
 import axios from "axios"
 
-// Token accessor — a module-level getter/setter, NOT a React import.
-// The interceptor below runs outside the React tree, so it can't call a
-// hook directly. AuthContext (Task 2-02) calls setTokenAccessor() once
-// it exists, wiring this up to its real access-token state. Until then,
-// getAccessToken() correctly returns null — there is no token yet.
+// Token accessor functions
 let getAccessToken = () => null
 let onTokenRefresh = async () => null
 
@@ -16,13 +12,13 @@ export function setRefreshHandler(fn) {
   onTokenRefresh = fn
 }
 
+// Create axios instance
 export const api = axios.create({
-  // API_ROUTES constants already include the /api prefix — baseURL must not.
-  // Empty fallback keeps requests same-origin so the Vite /api proxy applies.
   baseURL: import.meta.env.VITE_API_URL || "",
   withCredentials: true,
 })
 
+// Add authorization header to all requests
 api.interceptors.request.use((config) => {
   const token = getAccessToken()
   if (token) {
@@ -31,8 +27,7 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// Refresh-and-retry-once on 401 — a _retry flag on the original request
-// prevents an infinite loop if the refreshed token is also rejected.
+// Handle 401 Unauthorized by refreshing token and retrying
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
